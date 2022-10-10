@@ -74,4 +74,15 @@ class Packages extends \yii\db\ActiveRecord
     {
         return new PackagesQuery(get_called_class());
     }
+
+        /**
+     * Gets query for [[MemberPackages]].
+     *
+     * @return \yii\db\ActiveQuery|MemberPackageQuery
+     */
+    public function getMemberPackagesName($id)
+    {
+        return ;
+    }
+    
 }

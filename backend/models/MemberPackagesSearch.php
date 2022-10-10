@@ -70,4 +70,38 @@ class MemberPackagesSearch extends MemberPackage
 
         return $dataProvider;
     }
+
+    public function search2($id)
+    {
+        $query = MemberPackage::find();
+
+        // add conditions that should always apply here
+
+        $dataProvider = new ActiveDataProvider([
+            'query' => $query,
+        ]);
+
+        //$this->load($params);
+
+        if (!$this->validate()) {
+            // uncomment the following line if you do not want to return any records when validation fails
+            // $query->where('0=1');
+            return $dataProvider;
+        }
+        // grid filtering conditions
+        $query->andFilterWhere([
+            //'id' => $this->id,
+            'user_id' => $id,
+            //'refferor_id' => $this->refferor_id,
+            //'package_id' => $this->package_id,
+            //'filling_date' => $this->filling_date,
+            //'create_at' => $this->create_at,
+        ]);
+
+        $query->andFilterWhere(['like', 'status', $this->status]);
+
+     
+        return $dataProvider;
+    }
+
 }

@@ -1,6 +1,9 @@
 <?php
 
 namespace backend\controllers;
+
+use backend\models\MemberPackage;
+use backend\models\MemberPackagesSearch;
 use Yii;
 use backend\models\User;
 use backend\models\UserSearch;
@@ -69,7 +72,16 @@ class UserController extends Controller
             }
 
         } else {
-            return $this->render('view', ['model'=>$model]);
+           // return $this->render('view', ['model'=>$model]);
+
+            $searchModel = new MemberPackagesSearch();
+            $dataProvider = $searchModel->search2($id);
+          
+            return $this->render('view', [
+                'model' => $model,
+                'searchModel' => $searchModel,
+                'dataProvider' => $dataProvider,
+            ]);
         }
     }
 
@@ -157,14 +169,17 @@ class UserController extends Controller
         $model = $this->findModel($id);
 
         if($model->status == 10)
-        {
+        {   
             $model->status = 9;
-        }else{
+        }
+        elseif($model->status == 9)
+        {
             $model->status = 10;
         }
-        
+     
         if ($model->save()) {
             return $this->redirect(['index']);
         }
+       
     }
 }

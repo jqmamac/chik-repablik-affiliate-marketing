@@ -46,7 +46,7 @@ class User extends \yii\db\ActiveRecord
     public function rules()
     {
         return [
-            [['username', 'auth_key', 'password_hash', 'email', 'created_at', 'updated_at', 'first_name', 'last_name', 'middle_name', 'address', 'gender', 'mobile'], 'required'],
+            [['username', 'auth_key', 'password_hash', 'email', 'created_at', 'updated_at', 'first_name', 'last_name', 'address', 'gender', 'mobile'], 'required'],
             [['status', 'created_at', 'updated_at'], 'integer'],
             [['birthdate'], 'safe'],
             [['gender'], 'string'],
@@ -164,7 +164,5 @@ class User extends \yii\db\ActiveRecord
         return $text;
 
     }
-
-
 
 }
