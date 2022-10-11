@@ -2,16 +2,18 @@
 
 namespace backend\controllers;
 
-use backend\models\MemberPackage;
-use backend\models\MemberPackagesSearch;
+use Yii;
+use backend\models\MembersIncome;
+use backend\models\Withdrawal;
+use backend\models\WithdrawalSearch;
 use yii\web\Controller;
 use yii\web\NotFoundHttpException;
 use yii\filters\VerbFilter;
 
 /**
- * MemberPackageController implements the CRUD actions for MemberPackage model.
+ * WithdrawalController implements the CRUD actions for Withdrawal model.
  */
-class MemberPackageController extends Controller
+class WithdrawalController extends Controller
 {
     /**
      * @inheritDoc
@@ -32,13 +34,13 @@ class MemberPackageController extends Controller
     }
 
     /**
-     * Lists all MemberPackage models.
+     * Lists all Withdrawal models.
      *
      * @return string
      */
     public function actionIndex()
     {
-        $searchModel = new MemberPackagesSearch();
+        $searchModel = new WithdrawalSearch();
         $dataProvider = $searchModel->search($this->request->queryParams);
 
         return $this->render('index', [
@@ -48,7 +50,7 @@ class MemberPackageController extends Controller
     }
 
     /**
-     * Displays a single MemberPackage model.
+     * Displays a single Withdrawal model.
      * @param int $id ID
      * @return string
      * @throws NotFoundHttpException if the model cannot be found
@@ -61,25 +63,43 @@ class MemberPackageController extends Controller
     }
 
     /**
-     * Creates a new MemberPackage model.
+     * Creates a new Withdrawal model.
      * If creation is successful, the browser will be redirected to the 'view' page.
      * @return string|\yii\web\Response
      */
     public function actionCreate()
     {
-        $model = new MemberPackage();
+        $model = new Withdrawal();
+        $modelIncome = new MembersIncome();
 
         if ($this->request->isPost) {
             if ($model->load($this->request->post())) {
 
-                $filling_date = strtotime($model->filling_date);
-                $model->filling_date = date('Y-m-d',$filling_date);
-                $model->save();
+                $model->user_id = $_GET['id'];
+                $model->status = 'pending';
+                
+                $modelIncome->user_id = $model->user_id;
+                $modelIncome->amount = $model->amount*-1;
+                $modelIncome->type = 'withdrawal';
+                
+                $totali = $modelIncome->getTotalIncome($modelIncome->user_id);
 
-                if (isset($_GET['id'])){
-                    return $this->redirect(['user/view', 'id' => $_GET['id']]);
+                if ($totali > $model->amount ){
+                    $transaction = Yii::$app->db->beginTransaction();
+                    if( $model->save() && $modelIncome->save()){
+                        $transaction->commit(); 
+                    }else{
+                        $transaction->rollback();
+                    }
+                    
+    
+                    if (isset($_GET['id'])){
+                        return $this->redirect(['user/view', 'id' => $_GET['id']]);
+                    }else{
+                        return $this->redirect(['view', 'id' => $model->id]);
+                    }
                 }else{
-                    return $this->redirect(['view', 'id' => $model->id]);
+                    Yii::$app->session->setFlash('error',"<strong>Please check your Available Balance</strong>");
                 }
             }
         } else {
@@ -96,7 +116,7 @@ class MemberPackageController extends Controller
     }
 
     /**
-     * Updates an existing MemberPackage model.
+     * Updates an existing Withdrawal model.
      * If update is successful, the browser will be redirected to the 'view' page.
      * @param int $id ID
      * @return string|\yii\web\Response
@@ -105,19 +125,9 @@ class MemberPackageController extends Controller
     public function actionUpdate($id)
     {
         $model = $this->findModel($id);
-        
-        if ($this->request->isPost && $model->load($this->request->post())) {
-           
-            $filling_date = strtotime($model->filling_date);
-            $model->filling_date = date('Y-m-d',$filling_date);
 
-            if($model->save()){
-                if (isset($_GET['from'])){
-                    return $this->redirect(['user/view', 'id' => $_GET['from']]);
-                }else{
-                    return $this->redirect(['view', 'id' => $model->id]);
-                }
-            }       
+        if ($this->request->isPost && $model->load($this->request->post()) && $model->save()) {
+            return $this->redirect(['view', 'id' => $model->id]);
         }
 
         return $this->render('update', [
@@ -126,7 +136,7 @@ class MemberPackageController extends Controller
     }
 
     /**
-     * Deletes an existing MemberPackage model.
+     * Deletes an existing Withdrawal model.
      * If deletion is successful, the browser will be redirected to the 'index' page.
      * @param int $id ID
      * @return \yii\web\Response
@@ -136,30 +146,26 @@ class MemberPackageController extends Controller
     {
         $this->findModel($id)->delete();
 
-        if (isset($_GET['from'])){
-            return $this->redirect(['user/view', 'id' => $_GET['from']]);
-        }else{
-            return $this->redirect(['index']);
-        }
+        return $this->redirect(['index']);
     }
 
     /**
-     * Finds the MemberPackage model based on its primary key value.
+     * Finds the Withdrawal model based on its primary key value.
      * If the model is not found, a 404 HTTP exception will be thrown.
      * @param int $id ID
-     * @return MemberPackage the loaded model
+     * @return Withdrawal the loaded model
      * @throws NotFoundHttpException if the model cannot be found
      */
     protected function findModel($id)
     {
-        if (($model = MemberPackage::findOne(['id' => $id])) !== null) {
+        if (($model = Withdrawal::findOne(['id' => $id])) !== null) {
             return $model;
         }
 
         throw new NotFoundHttpException(Yii::t('app', 'The requested page does not exist.'));
     }
 
-    /**
+        /**
      * Activate an existing User model.
      * If deletion is successful, the browser will be redirected to the 'index' page.
      * @param int $id ID
@@ -170,10 +176,11 @@ class MemberPackageController extends Controller
     {
         $model = $this->findModel($id);
 
-        if($model->status == 'active')
+        if($model->status == 'pending')
         {   
-            $model->status = 'expired';
+            $model->status = 'approved';
         }
+        
         if ($model->save()) {
             return $this->redirect(['user/view', 'id' => $_GET['from']]);
         }

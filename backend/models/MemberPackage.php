@@ -35,7 +35,7 @@ class MemberPackage extends \yii\db\ActiveRecord
     public function rules()
     {
         return [
-            [['user_id', 'refferor_id', 'package_id', 'filling_date', 'status'], 'required'],
+            [['user_id', 'refferor_id', 'package_id', 'filling_date'], 'required'],
             [['user_id', 'refferor_id', 'package_id'], 'integer'],
             [['filling_date', 'create_at'], 'safe'],
             [['status'], 'string'],

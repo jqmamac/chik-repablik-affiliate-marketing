@@ -4,9 +4,12 @@ namespace backend\controllers;
 
 use backend\models\MemberPackage;
 use backend\models\MemberPackagesSearch;
+use backend\models\MembersIncome;
+use backend\models\MembersIncomeSearch;
 use Yii;
 use backend\models\User;
 use backend\models\UserSearch;
+use backend\models\WithdrawalSearch;
 use yii\web\Controller;
 use yii\web\NotFoundHttpException;
 use yii\filters\VerbFilter;
@@ -72,15 +75,27 @@ class UserController extends Controller
             }
 
         } else {
-           // return $this->render('view', ['model'=>$model]);
 
+            //Member Package
             $searchModel = new MemberPackagesSearch();
             $dataProvider = $searchModel->search2($id);
+
+            //Member Package
+            $searchModel2 = new WithdrawalSearch();
+            $dataProvider2 = $searchModel2->search2($id);
+
+            //Member Package
+            $searchModel3 = new MembersIncomeSearch();
+            $dataProvider3 = $searchModel3->search2($id);
           
             return $this->render('view', [
                 'model' => $model,
                 'searchModel' => $searchModel,
                 'dataProvider' => $dataProvider,
+                'searchModel2' => $searchModel2,
+                'dataProvider2' => $dataProvider2,
+                'searchModel3' => $searchModel3,
+                'dataProvider3' => $dataProvider3,
             ]);
         }
     }

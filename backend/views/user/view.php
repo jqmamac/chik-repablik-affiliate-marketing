@@ -7,10 +7,7 @@ use yii\helpers\ArrayHelper;
 //use yii\widgets\DetailView;
 use kartik\detail\DetailView;
 use kartik\grid\GridView;
-use yii\bootstrap5\Modal;
-use kartik\builder\Form;
-use kartik\form\ActiveForm;
-use kartik\builder\FormGrid;
+
 
 /** @var yii\web\View $this */
 /** @var backend\models\User $model */
@@ -145,108 +142,174 @@ $this->params['breadcrumbs'][] = $this->title;
         'dataProvider'=> $dataProvider,
         //'filterModel' => $searchModel,
         'columns' => [
+                       'id',
                         [
                             'label' => 'Package Name',
                             'value' => function ($searchModel) {
-                                $packages =  Packages::findOne(['id' => $searchModel->id]);
-                                return $packages->name;
+                                $packages =  Packages::findOne(['id' => $searchModel->package_id]);
+                                if($packages)
+                                    return $packages->name;
+                                
                             }
                         ],   
                         [
                             'label' => 'Package Price',
                             'value' => function ($searchModel) {
-                                $packages =  Packages::findOne(['id' => $searchModel->id]);
-                                return $packages->price;
+                                $packages =  Packages::findOne(['id' => $searchModel->package_id]);
+                                if($packages)
+                                  return $packages->price;
+                            }
+                        ],
+                        [
+                            'label' => 'Daily Share',
+                            'value' => function ($searchModel) {
+                                $packages =  Packages::findOne(['id' => $searchModel->package_id]);
+                                if($packages)
+                                  return $packages->daily_share;
+                            }
+                        ],
+                        [
+                            'label' => 'Selling Period',
+                            'value' => function ($searchModel) {
+                                $packages =  Packages::findOne(['id' => $searchModel->package_id]);
+                                if($packages)
+                                  return $packages->selling_period;
                             }
                         ],
                         [
                             'label' => 'Refferror',
                             'value' => function ($searchModel) {
-                                $user =  User::findOne(['id' => $searchModel->user_id]);
-                                return $user->first_name.' '.$user->last_name;
+                                $user =  User::findOne(['id' => $searchModel->refferor_id]);
+                                if($user)
+                                    return $user->first_name.' '.$user->last_name;
                             }
                         ],
-                        'filling_date',
-                        'status'
+                        [
+                            'label' => 'Filling Date',
+                            'value' => function ($searchModel) {
+                                $filling_date = strtotime($searchModel->filling_date);
+                                $newdt = date('M/d/Y',$filling_date);
+                                return $newdt;
+                            }
+                        ],
+                        'status',
+                        [
+                            'class' => 'kartik\grid\ActionColumn',
+                            'dropdown' => false,
+                            'dropdownOptions' => ['class' => 'float-right'],
+                            'template' => '{update} {delete} {activate}',
+                            'buttons' => [
+                                //view button
+                                'activate' => function ($url, $model) {
+                                    return Html::a('<span class="fa fa-toggle-on"></span>', $url, []);
+                                },
+                            ],
+                            'urlCreator' => function($action, $model, $key, $index) {
+                                if ($action === 'update') {
+                                    $url = Yii::$app->urlManager->createAbsoluteUrl(['member-package/update', 'id' => $model->id,'from' => $model->user_id]);
+                                    return $url;
+                                }elseif ($action === 'delete') {
+                                    $url = Yii::$app->urlManager->createAbsoluteUrl(['member-package/delete', 'id' => $model->id,'from' => $model->user_id]);
+                                    return $url;
+                                }elseif ($action === 'activate') {
+                                $url = Yii::$app->urlManager->createAbsoluteUrl(['member-package/activate', 'id' => $model->id,'from' => $model->user_id]);
+                                return $url;
+                            }
+                             },
+                            'headerOptions' => ['class' => 'kartik-sheet-style'],
+                        ],
                                                                     
                     ],
         'pjax'=>true,
         'responsive'=>true,
         'panel' => [
-            'heading'=>'<h3 class="panel-title"><i class="fas fa-business"></i> Business Info</h3>',
+            'heading'=>'<h3 class="panel-title"><i class="fas fa-book"></i> Business Info</h3>',
+            'before'=>Html::a('<i class="fas fa-plus"></i> Add Package', ['member-package/create','id'=>$model->id], ['class' => 'btn btn-success']),
             'type'=>'success',
         ],
     ]);?>
     
-    </br>
-        <?php   Modal::begin([
-                'title' => 'Add Package',
-                'toggleButton' => ['label' => '<i class="fas fa-th-list"></i> Add Package', 'class' => 'btn btn-success'],
-                'options' => ['tabindex' => false]
-            ]); 
-        ?>
-        
-        <?php $form = ActiveForm::begin(['type'=>ActiveForm::TYPE_VERTICAL]);
-            
-                $user = ArrayHelper::map(User::find()->where(['status'=>'10'])->all(), 'id', 'first_name');
-                array_walk($user, function(&$value, $key){
-                    $value = $key.' -- '.$value;
-                });
+</div>
+</br>
+<div class="user-income">
 
-                echo FormGrid::widget([
-                    'model'=>$searchModel,
-                    'form'=>$form,
-                    'autoGenerateColumns'=>true,
-                    'rows'=>[
+    <?= GridView::widget([
+        'dataProvider'=> $dataProvider3,
+        //'filterModel' => $searchModel,
+        'columns' => [
+                       'id',
+                       'amount',
+                       'created_at',
                         [
-                            'attributes'=>[       // 2 column layout
-                                'user_id'=>['type'=>Form::INPUT_DROPDOWN_LIST, 'items'=>[$model->id => $model->username], 'options'=>['title'=>'User']],
-                            ]
-                        ],
-                        [
-                            'attributes'=>[
-                                'package_id'=>['type'=>Form::INPUT_DROPDOWN_LIST, 'items'=>ArrayHelper::map(Packages::find()->all(), 'id', 'name'), 'hint'=>'Type and select state'],
-                           ]
+                            'class' => 'kartik\grid\ActionColumn',
+                            'dropdown' => false,
+                            'dropdownOptions' => ['class' => 'float-right'],
+                            'template' => '{update}',
+                            'buttons' => [
+                                //view button
+                                'activate' => function ($url, $model) {
+                                    return Html::a('<span class="fa fa-toggle-on"></span>', $url, []);
+                                },
                             ],
-                        [
-                            'attributes'=>[
-                                'refferor_id'=>[
-                                    'type'=>Form::INPUT_WIDGET, 
-                                    'widgetClass'=>'kartik\select2\Select2', 
-                                    'options' => [
-                                        'data' => $user,  
-                                    ],
-                                    'allowClear' => true    
-                                ]
-                            ]
+                            'urlCreator' => function($action, $model, $key, $index) {
+                                if ($action === 'update') {
+                                    $url = Yii::$app->urlManager->createAbsoluteUrl(['members-income/update', 'id' => $model->id,'from' => $model->user_id]);
+                                    return $url;
+                                }
+                             },
+                            'headerOptions' => ['class' => 'kartik-sheet-style'],
                         ],
+                                                                    
+                    ],
+        'pjax'=>true,
+        'responsive'=>true,
+        'panel' => [
+            'heading'=>'<h3 class="panel-title"><i class="fa fa-money"></i> Available Income:  ₱'.$searchModel3->getTotalIncome($model->id).'</h3>',
+            'before'=>Html::a('<i class="fas fa-plus"></i> Add Income', ['members-income/create','id'=>$model->id], ['class' => 'btn btn-success']),
+            'type'=>'success',
+        ],
+    ]);?>
+    
+</div>
+</br>
+<div class="user-withdrawal">
+
+    <?= GridView::widget([
+        'dataProvider'=> $dataProvider2,
+        //'filterModel' => $searchModel,
+        'columns' => [
+                       'id',
+                       'amount',
+                       'status',
+                       'created_at',
                         [
-                            'attributes'=>[
-                                'filling_date'=>[
-                                    'type'=>Form::INPUT_WIDGET, 
-                                    'widgetClass'=>'\kartik\date\DatePicker', 
-                                    'hint'=>'Enter filling date (mm/dd/yyyy)'],
-                                ]
-                        ],
-                        [
-                            'attributes'=>[       // 3 column layout
-                    
-                                'actions'=>[    // embed raw HTML content
-                                    'type'=>Form::INPUT_RAW, 
-                                    'value'=>  '<div style="text-align: left; margin-top: 20px">' . 
-                                        Html::resetButton('Reset', ['class'=>'btn btn-secondary btn-default']) . ' ' .
-                                        Html::submitButton('Submit', ['class' => 'btn btn-primary', 
-                                            'value'=>'my_value', 'name'=>'submit',
-                                            'onClick'=>'buttonClicked']) . 
-                                        '</div>'
-                                ],
+                            'class' => 'kartik\grid\ActionColumn',
+                            'dropdown' => false,
+                            'dropdownOptions' => ['class' => 'float-right'],
+                            'template' => '{activate}',
+                            'buttons' => [
+                                //view button
+                                'activate' => function ($url, $model) {
+                                    return Html::a('<span class="fa fa-toggle-on"></span>', $url, []);
+                                },
                             ],
+                            'urlCreator' => function($action, $model, $key, $index) {
+                                if ($action === 'activate') {
+                                    $url = Yii::$app->urlManager->createAbsoluteUrl(['withdrawal/activate', 'id' => $model->id,'from' => $model->user_id]);
+                                    return $url;
+                                }
+                             },
+                            'headerOptions' => ['class' => 'kartik-sheet-style'],
                         ],
-                    ]
-                    ]
-                );
-                ActiveForm::end(); 
-            ?>
-        
-       <?php Modal::end(); ?>
+                                                                    
+                    ],
+        'pjax'=>true,
+        'responsive'=>true,
+        'panel' => [
+            'heading'=>'<h3 class="panel-title"><i class="fa fa-money"></i> Withrawal  </h3>',
+            'before'=>Html::a('<i class="fas fa-plus"></i> Cashout', ['withdrawal/create','id'=>$model->id], ['class' => 'btn btn-success']),
+            'type'=>'success',
+        ],
+    ]);?>
+    
 </div>
