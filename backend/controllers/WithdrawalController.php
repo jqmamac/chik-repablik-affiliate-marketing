@@ -9,6 +9,8 @@ use backend\models\WithdrawalSearch;
 use yii\web\Controller;
 use yii\web\NotFoundHttpException;
 use yii\filters\VerbFilter;
+use yii\filters\AccessControl;
+
 
 /**
  * WithdrawalController implements the CRUD actions for Withdrawal model.
@@ -23,6 +25,25 @@ class WithdrawalController extends Controller
         return array_merge(
             parent::behaviors(),
             [
+                'access' => [
+                    'class' => AccessControl::class,
+                    'rules' => [
+                        [
+                            'actions' => ['login', 'error'],
+                            'allow' => true,
+                        ],
+                        [
+                            'allow' => true,
+                            'actions' => ['create'],
+                            'roles' => ['member','admin'],
+                        ],
+                        [
+                            'allow' => true,
+                            'actions' => ['index','delete','activate', 'update'],
+                            'roles' => ['admin'],
+                        ],
+                    ],
+                ],
                 'verbs' => [
                     'class' => VerbFilter::className(),
                     'actions' => [
@@ -182,7 +203,12 @@ class WithdrawalController extends Controller
         }
         
         if ($model->save()) {
-            return $this->redirect(['user/view', 'id' => $_GET['from']]);
+            if ($_GET['from']=='admin'){
+                return $this->redirect(['user/index',]);
+            }else{
+                return $this->redirect(['user/view', 'id' => $_GET['from']]);
+            }
+         
         }
        
     }

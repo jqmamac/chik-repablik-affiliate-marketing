@@ -1,22 +1,23 @@
 <?php
 
-use backend\models\Packages;
-use backend\models\User;
 use yii\helpers\Html;
-use yii\helpers\ArrayHelper;
-//use yii\widgets\DetailView;
-use kartik\detail\DetailView;
+use backend\models\User;
 use kartik\grid\GridView;
-
+use backend\models\Packages;
+//use yii\widgets\DetailView;
+use yii\helpers\ArrayHelper;
+use kartik\detail\DetailView;
+use PHPUnit\Framework\MockObject\CannotUseAddMethodsException;
 
 /** @var yii\web\View $this */
 /** @var backend\models\User $model */
 
-$this->title = $model->id;
-$this->params['breadcrumbs'][] = ['label' => Yii::t('app', 'Users'), 'url' => ['index']];
-$this->params['breadcrumbs'][] = $this->title;
+$this->title = Yii::t('app', 'Affiliate Dashboard');
+
 \yii\web\YiiAsset::register($this);
 ?>
+<h1><?= Html::encode($this->title); ?></h1>
+
 <div class="user-view">
     <?php
         // DetailView Attributes Configuration
@@ -158,7 +159,11 @@ $this->params['breadcrumbs'][] = $this->title;
                                 $packages =  Packages::findOne(['id' => $searchModel->package_id]);
                                 if($packages)
                                   return $packages->price;
-                            }
+                            },
+                            'vAlign' => 'middle',
+                            'hAlign' => 'right', 
+                            'width' => '7%',
+                            'format' => ['decimal', 2],
                         ],
                         [
                             'label' => 'Daily Share',
@@ -166,7 +171,11 @@ $this->params['breadcrumbs'][] = $this->title;
                                 $packages =  Packages::findOne(['id' => $searchModel->package_id]);
                                 if($packages)
                                   return $packages->daily_share;
-                            }
+                            },
+                            'vAlign' => 'middle',
+                            'hAlign' => 'right', 
+                            'width' => '7%',
+                            'format' => ['decimal', 2],
                         ],
                         [
                             'label' => 'Selling Period',
@@ -174,7 +183,11 @@ $this->params['breadcrumbs'][] = $this->title;
                                 $packages =  Packages::findOne(['id' => $searchModel->package_id]);
                                 if($packages)
                                   return $packages->selling_period;
-                            }
+                            },
+                            'vAlign' => 'middle',
+                            'hAlign' => 'right', 
+                            'width' => '7%',
+                            'format' => ['decimal', 2],
                         ],
                         [
                             'label' => 'Refferror',
@@ -197,11 +210,23 @@ $this->params['breadcrumbs'][] = $this->title;
                             'class' => 'kartik\grid\ActionColumn',
                             'dropdown' => false,
                             'dropdownOptions' => ['class' => 'float-right'],
-                            'template' => '{update} {delete} {activate}',
+                            'template' => '{update} {activate}',
                             'buttons' => [
                                 //view button
                                 'activate' => function ($url, $model) {
-                                    return Html::a('<span class="fa fa-toggle-on"></span>', $url, []);
+                                    if (Yii::$app->user->can('admin')){
+                                        return Html::a('<span class="fa fa-toggle-on"></span>', $url, []);
+                                    }
+                                },
+                                'delete' => function ($url, $model) {
+                                    if (Yii::$app->user->can('admin')){
+                                        return Html::a('<span class="fa fa-trash"></span>', $url, []);
+                                    }
+                                },
+                                'update' => function ($url, $model) {
+                                    if (Yii::$app->user->can('admin')){
+                                        return Html::a('<i class="fas fa-pencil-alt"></i>', $url, []);
+                                    }
                                 },
                             ],
                             'urlCreator' => function($action, $model, $key, $index) {
@@ -212,9 +237,9 @@ $this->params['breadcrumbs'][] = $this->title;
                                     $url = Yii::$app->urlManager->createAbsoluteUrl(['member-package/delete', 'id' => $model->id,'from' => $model->user_id]);
                                     return $url;
                                 }elseif ($action === 'activate') {
-                                $url = Yii::$app->urlManager->createAbsoluteUrl(['member-package/activate', 'id' => $model->id,'from' => $model->user_id]);
-                                return $url;
-                            }
+                                    $url = Yii::$app->urlManager->createAbsoluteUrl(['member-package/activate', 'id' => $model->id,'from' => $model->user_id]);
+                                    return $url;
+                                }
                              },
                             'headerOptions' => ['class' => 'kartik-sheet-style'],
                         ],
@@ -238,8 +263,15 @@ $this->params['breadcrumbs'][] = $this->title;
         //'filterModel' => $searchModel,
         'columns' => [
                        'id',
-                       'amount',
+                        [
+                            'attribute' => 'amount', 
+                            'vAlign' => 'middle',
+                            'hAlign' => 'right', 
+                            'width' => '7%',
+                            'format' => ['decimal', 2],
+                        ],
                        'created_at',
+                       'note',
                         [
                             'class' => 'kartik\grid\ActionColumn',
                             'dropdown' => false,
@@ -247,9 +279,13 @@ $this->params['breadcrumbs'][] = $this->title;
                             'template' => '{update}',
                             'buttons' => [
                                 //view button
-                                'activate' => function ($url, $model) {
-                                    return Html::a('<span class="fa fa-toggle-on"></span>', $url, []);
+                        
+                                'update' => function ($url, $model) {
+                                    if (Yii::$app->user->can('admin')){
+                                        return Html::a('<i class="fas fa-pencil-alt"></i>', $url, []);
+                                    }
                                 },
+                                
                             ],
                             'urlCreator' => function($action, $model, $key, $index) {
                                 if ($action === 'update') {
@@ -265,7 +301,7 @@ $this->params['breadcrumbs'][] = $this->title;
         'responsive'=>true,
         'panel' => [
             'heading'=>'<h3 class="panel-title"><i class="fa fa-money"></i> Available Income:  ₱'.$searchModel3->getTotalIncome($model->id).'</h3>',
-            'before'=>Html::a('<i class="fas fa-plus"></i> Add Income', ['members-income/create','id'=>$model->id], ['class' => 'btn btn-success']),
+            'before'=>(Yii::$app->user->can('admin')) ? Html::a('<i class="fas fa-plus"></i> Add Income', ['members-income/create','id'=>$model->id], ['class' => 'btn btn-success']) : '',
             'type'=>'success',
         ],
     ]);?>
@@ -279,7 +315,13 @@ $this->params['breadcrumbs'][] = $this->title;
         //'filterModel' => $searchModel,
         'columns' => [
                        'id',
-                       'amount',
+                        [
+                            'attribute' => 'amount', 
+                            'vAlign' => 'middle',
+                            'hAlign' => 'right', 
+                            'width' => '7%',
+                            'format' => ['decimal', 2],
+                        ],
                        'status',
                        'created_at',
                         [
@@ -290,7 +332,8 @@ $this->params['breadcrumbs'][] = $this->title;
                             'buttons' => [
                                 //view button
                                 'activate' => function ($url, $model) {
-                                    return Html::a('<span class="fa fa-toggle-on"></span>', $url, []);
+                                    if (Yii::$app->user->can('admin'))
+                                        return Html::a('<span class="fa fa-toggle-on"></span>', $url, []);
                                 },
                             ],
                             'urlCreator' => function($action, $model, $key, $index) {

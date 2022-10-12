@@ -165,4 +165,14 @@ class User extends \yii\db\ActiveRecord
 
     }
 
+    /**
+     * Gets query for [[User]].
+     *
+     * @return \yii\db\ActiveQuery|UserQuery
+     */
+    public function getTotalIncome($id)
+    {
+        return  MembersIncome::find()->where(['user_id'=> $id])->sum('amount');
+    }
+
 }

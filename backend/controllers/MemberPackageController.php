@@ -7,6 +7,7 @@ use backend\models\MemberPackagesSearch;
 use yii\web\Controller;
 use yii\web\NotFoundHttpException;
 use yii\filters\VerbFilter;
+use yii\filters\AccessControl;
 
 /**
  * MemberPackageController implements the CRUD actions for MemberPackage model.
@@ -21,6 +22,20 @@ class MemberPackageController extends Controller
         return array_merge(
             parent::behaviors(),
             [
+                'access' => [
+                    'class' => AccessControl::class,
+                    'rules' => [
+                        [
+                            'actions' => ['login', 'error'],
+                            'allow' => true,
+                        ],
+                        [
+                            'actions' => ['member-package', 'index', 'create', 'update', 'activate', 'delete'],
+                            'allow' => true,
+                            'roles' => ['@'],
+                        ],
+                    ],
+                ],
                 'verbs' => [
                     'class' => VerbFilter::className(),
                     'actions' => [
@@ -134,13 +149,18 @@ class MemberPackageController extends Controller
      */
     public function actionDelete($id)
     {
-        $this->findModel($id)->delete();
-
-        if (isset($_GET['from'])){
-            return $this->redirect(['user/view', 'id' => $_GET['from']]);
-        }else{
-            return $this->redirect(['index']);
-        }
+        
+        try {
+            $this->findModel($id)->delete();
+            if (isset($_GET['from'])){
+                return $this->redirect(['user/view', 'id' => $_GET['from']]);
+            }else{
+                return $this->redirect(['index']);
+            }
+        } catch (IntegrityException $e) {
+            
+            throw new NotFoundHttpException(Yii::t('app', 'Unable to delete affiliate.'));
+        }       
     }
 
     /**
@@ -174,6 +194,7 @@ class MemberPackageController extends Controller
         {   
             $model->status = 'expired';
         }
+        
         if ($model->save()) {
             return $this->redirect(['user/view', 'id' => $_GET['from']]);
         }

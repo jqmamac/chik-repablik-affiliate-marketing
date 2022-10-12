@@ -3,6 +3,7 @@
 namespace frontend\controllers;
 
 use backend\models\MemberPackage;
+use backend\models\User;
 use frontend\models\ResendVerificationEmailForm;
 use frontend\models\VerifyEmailForm;
 use Yii;
@@ -36,6 +37,11 @@ class SiteController extends Controller
                         'actions' => ['signup'],
                         'allow' => true,
                         'roles' => ['?'],
+                    ],
+                    [
+                        'actions' => ['signup'],
+                        'allow' => true,
+                        'roles' => ['admin'],
                     ],
                     [
                         'actions' => ['logout'],
@@ -92,14 +98,23 @@ class SiteController extends Controller
 
         $model = new LoginForm();
         if ($model->load(Yii::$app->request->post()) && $model->login()) {
-            return $this->goBack();
+
+            if(Yii::$app->user->can( 'admin')){
+                return $this->redirect(Yii::$app->urlManagerBackEnd->createUrl('user'));
+            }else{
+                return $this->redirect(Yii::$app->urlManagerBackEnd->createUrl('user/view?id='.Yii::$app->user->id));
+            }
+           
         }
 
         $model->password = '';
 
-        return $this->render('login', [
-            'model' => $model,
-        ]);
+ 
+            return $this->render('login', [
+                'model' => $model,
+            ]);
+        
+
     }
 
     /**
@@ -154,22 +169,23 @@ class SiteController extends Controller
      */
     public function actionSignup()
     {
-        //if(Yii::$app->user->can( 'can-signup '))
-        //{
+      
             $model = new SignupForm();
             $member_package = new MemberPackage();
             if ($model->load(Yii::$app->request->post()) && $model->signup()) {
-                Yii::$app->session->setFlash('success', 'Thank you for registration. Please contact the admin to activate your account.');
-                return $this->goHome();
+                if (Yii::$app->user->can('admin')){
+                    return $this->redirect(Yii::$app->urlManagerBackEnd->createUrl('user'));
+                }else{
+                    Yii::$app->session->setFlash('success', 'Thank you for registration. Please contact the admin to activate your account.');
+                    return $this->goHome();
+                }
+               
             }
     
             return $this->render('signup', [
                 'model' => $model,
                 'member_package' => $member_package,
             ]);
-        //}else{
-        //    throw new \yii\web\ForbiddenHttpException('Sorry, you are not allowed to do that.');
-        //}
 
     }
 
