@@ -1,51 +1,87 @@
 <?php
 
 use backend\models\Packages;
+use backend\models\User;
 use yii\helpers\Html;
 use yii\helpers\Url;
 use yii\grid\ActionColumn;
-use yii\grid\GridView;
+//use yii\grid\GridView;
 use yii\widgets\Pjax;
+
+use kartik\grid\GridView;
 /** @var yii\web\View $this */
 /** @var backend\models\PackagesSearch $searchModel */
 /** @var yii\data\ActiveDataProvider $dataProvider */
 
-$this->title = Yii::t('app', 'Packages');
-$this->params['breadcrumbs'][] = $this->title;
+$this->title = Yii::t('app', 'Package Manager');
 ?>
 <div class="packages-index">
 
-    <h1><?= Html::encode($this->title) ?></h1>
-
-    <p>
-        <?= Html::a(Yii::t('app', 'Create Packages'), ['create'], ['class' => 'btn btn-success']) ?>
-    </p>
-
-    <?php Pjax::begin(); ?>
-    <?php // echo $this->render('_search', ['model' => $searchModel]); ?>
-
     <?= GridView::widget([
-        'dataProvider' => $dataProvider,
+        'dataProvider'=> $dataProvider,
         'filterModel' => $searchModel,
         'columns' => [
-            ['class' => 'yii\grid\SerialColumn'],
-
-            'id',
-            'name',
-            'price',
-            'daily_share',
-            'selling_period',
-            //'weekly_withdrawal',
-            //'create_at',
-            [
-                'class' => ActionColumn::className(),
-                'urlCreator' => function ($action, Packages $model, $key, $index, $column) {
-                    return Url::toRoute([$action, 'id' => $model->id]);
-                 }
-            ],
+                       'name',
+                        [
+                            'attribute' => 'price', 
+                            'vAlign' => 'middle',
+                            'hAlign' => 'right', 
+                            'width' => '7%',
+                            'format' => ['decimal', 2],
+                            //'pageSummary' => true
+                        ],
+                        [
+                            'attribute' => 'daily_share', 
+                            'vAlign' => 'middle',
+                            'hAlign' => 'right', 
+                            'width' => '7%',
+                            'format' => ['decimal', 2],
+                            //'pageSummary' => true
+                        ],
+                        [
+                            'attribute' => 'weekly_withdrawal', 
+                            'vAlign' => 'middle',
+                            'hAlign' => 'right', 
+                            'width' => '7%',
+                            'format' => ['decimal', 2],
+                            //'pageSummary' => true
+                        ],
+                        [
+                            'attribute' => 'selling_period', 
+                            'vAlign' => 'middle',
+                            'hAlign' => 'right', 
+                            'width' => '7%',
+                        ],
+                        [
+                            'class' => 'kartik\grid\ActionColumn',
+                            'dropdown' => false,
+                            'dropdownOptions' => ['class' => 'float-right'],
+                            'template' => '{update} {delete}',
+                            // 'buttons' => [
+                            //     //view button
+                            //     'activate' => function ($url, $model) {
+                            //         return Html::a('<span class="fa fa-toggle-on"></span>', $url, []);
+                            //     },
+                            // ],
+                            // 'urlCreator' => function($action, $model, $key, $index) {
+                            //     if ($action === 'activate') {
+                            //         $url = Yii::$app->urlManager->createAbsoluteUrl(['withdrawal/activate', 'id' => $model->id,'from' => 'admin', 'user_id' => $model->user_id]);
+                            //         return $url;
+                            //     }
+                            //  },
+                            'headerOptions' => ['class' => 'kartik-sheet-style'],
+                        ],
+                                                                    
+                    ],
+        'pjax'=>true,
+        'responsive'=>true,
+        'responsiveWrap' =>true,
+        'panel' => [
+            'heading'=>'<h3 class="panel-title"><i class="fas fa-history"></i> Package Manager  </h3>',
+            'before'=>Html::a('<i class="fas fa-plus"></i> Create Packages', ['packages/create'], ['class' => 'btn btn-success']),
+            'type'=>'success',
         ],
-    ]); ?>
-
-    <?php Pjax::end(); ?>
+    ]);?>
+    
 
 </div>

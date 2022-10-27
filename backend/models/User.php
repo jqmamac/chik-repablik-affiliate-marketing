@@ -46,7 +46,7 @@ class User extends \yii\db\ActiveRecord
     public function rules()
     {
         return [
-            [['username', 'auth_key', 'password_hash', 'email', 'created_at', 'updated_at', 'first_name', 'last_name', 'middle_name', 'address', 'gender', 'mobile'], 'required'],
+            [['username', 'auth_key', 'password_hash', 'email', 'created_at', 'updated_at', 'first_name', 'last_name', 'address', 'gender', 'mobile'], 'required'],
             [['status', 'created_at', 'updated_at'], 'integer'],
             [['birthdate'], 'safe'],
             [['gender'], 'string'],
@@ -165,6 +165,24 @@ class User extends \yii\db\ActiveRecord
 
     }
 
+    /**
+     * Gets query for [[User]].
+     *
+     * @return \yii\db\ActiveQuery|UserQuery
+     */
+    public function getTotalIncome($id)
+    {
+        return  MembersIncome::find()->where(['user_id'=> $id])->sum('amount');
+    }
 
+    /**
+     * Gets query for [[User]].
+     *
+     * @return \yii\db\ActiveQuery|UserQuery
+     */
+    public function getTotalIncomeOnly($id)
+    {
+        return  MembersIncome::find()->where(['user_id'=> $id,'type'=>'income'])->sum('amount');
+    }
 
 }

@@ -7,6 +7,7 @@ use backend\models\MemberPackagesSearch;
 use yii\web\Controller;
 use yii\web\NotFoundHttpException;
 use yii\filters\VerbFilter;
+use yii\filters\AccessControl;
 
 /**
  * MemberPackageController implements the CRUD actions for MemberPackage model.
@@ -21,6 +22,20 @@ class MemberPackageController extends Controller
         return array_merge(
             parent::behaviors(),
             [
+                'access' => [
+                    'class' => AccessControl::class,
+                    'rules' => [
+                        [
+                            'actions' => ['login', 'error'],
+                            'allow' => true,
+                        ],
+                        [
+                            'actions' => ['member-package', 'index', 'create', 'update', 'activate', 'delete'],
+                            'allow' => true,
+                            'roles' => ['@'],
+                        ],
+                    ],
+                ],
                 'verbs' => [
                     'class' => VerbFilter::className(),
                     'actions' => [
@@ -70,11 +85,24 @@ class MemberPackageController extends Controller
         $model = new MemberPackage();
 
         if ($this->request->isPost) {
-            if ($model->load($this->request->post()) && $model->save()) {
-                return $this->redirect(['view', 'id' => $model->id]);
+            if ($model->load($this->request->post())) {
+
+                $filling_date = strtotime($model->filling_date);
+                $model->filling_date = date('Y-m-d',$filling_date);
+                $model->save();
+
+                if (isset($_GET['id'])){
+                    return $this->redirect(['user/view', 'id' => $_GET['id']]);
+                }else{
+                    return $this->redirect(['view', 'id' => $model->id]);
+                }
             }
         } else {
             $model->loadDefaultValues();
+        }
+
+        if (isset($_GET['id'])){
+            $model->user_id = $_GET['id'];
         }
 
         return $this->render('create', [
@@ -92,9 +120,19 @@ class MemberPackageController extends Controller
     public function actionUpdate($id)
     {
         $model = $this->findModel($id);
+        
+        if ($this->request->isPost && $model->load($this->request->post())) {
+           
+            $filling_date = strtotime($model->filling_date);
+            $model->filling_date = date('Y-m-d',$filling_date);
 
-        if ($this->request->isPost && $model->load($this->request->post()) && $model->save()) {
-            return $this->redirect(['view', 'id' => $model->id]);
+            if($model->save()){
+                if (isset($_GET['from'])){
+                    return $this->redirect(['user/view', 'id' => $_GET['from']]);
+                }else{
+                    return $this->redirect(['view', 'id' => $model->id]);
+                }
+            }       
         }
 
         return $this->render('update', [
@@ -111,9 +149,18 @@ class MemberPackageController extends Controller
      */
     public function actionDelete($id)
     {
-        $this->findModel($id)->delete();
-
-        return $this->redirect(['index']);
+        
+        try {
+            $this->findModel($id)->delete();
+            if (isset($_GET['from'])){
+                return $this->redirect(['user/view', 'id' => $_GET['from']]);
+            }else{
+                return $this->redirect(['index']);
+            }
+        } catch (IntegrityException $e) {
+            
+            throw new NotFoundHttpException(Yii::t('app', 'Unable to delete affiliate.'));
+        }       
     }
 
     /**
@@ -130,5 +177,27 @@ class MemberPackageController extends Controller
         }
 
         throw new NotFoundHttpException(Yii::t('app', 'The requested page does not exist.'));
+    }
+
+    /**
+     * Activate an existing User model.
+     * If deletion is successful, the browser will be redirected to the 'index' page.
+     * @param int $id ID
+     * @return \yii\web\Response
+     * @throws NotFoundHttpException if the model cannot be found
+     */
+    public function actionActivate($id)
+    {
+        $model = $this->findModel($id);
+
+        if($model->status == 'active')
+        {   
+            $model->status = 'expired';
+        }
+        
+        if ($model->save()) {
+            return $this->redirect(['user/view', 'id' => $_GET['from']]);
+        }
+       
     }
 }

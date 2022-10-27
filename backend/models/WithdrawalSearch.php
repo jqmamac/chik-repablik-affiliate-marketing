@@ -4,12 +4,12 @@ namespace backend\models;
 
 use yii\base\Model;
 use yii\data\ActiveDataProvider;
-use backend\models\MemberPackage;
+use backend\models\Withdrawal;
 
 /**
- * MemberPackagesSearch represents the model behind the search form of `backend\models\MemberPackage`.
+ * WithdrawalSearch represents the model behind the search form of `backend\models\Withdrawal`.
  */
-class MemberPackagesSearch extends MemberPackage
+class WithdrawalSearch extends Withdrawal
 {
     /**
      * {@inheritdoc}
@@ -17,8 +17,9 @@ class MemberPackagesSearch extends MemberPackage
     public function rules()
     {
         return [
-            [['id', 'user_id', 'refferor_id', 'package_id'], 'integer'],
-            [['filling_date', 'status', 'create_at'], 'safe'],
+            [['id', 'user_id'], 'integer'],
+            [['amount'], 'number'],
+            [['status', 'created_at'], 'safe'],
         ];
     }
 
@@ -40,7 +41,7 @@ class MemberPackagesSearch extends MemberPackage
      */
     public function search($params)
     {
-        $query = MemberPackage::find();
+        $query = Withdrawal::find();
 
         // add conditions that should always apply here
 
@@ -60,10 +61,8 @@ class MemberPackagesSearch extends MemberPackage
         $query->andFilterWhere([
             'id' => $this->id,
             'user_id' => $this->user_id,
-            'refferor_id' => $this->refferor_id,
-            'package_id' => $this->package_id,
-            'filling_date' => $this->filling_date,
-            'create_at' => $this->create_at,
+            'amount' => $this->amount,
+            'created_at' => $this->created_at,
         ]);
 
         $query->andFilterWhere(['like', 'status', $this->status]);
@@ -71,9 +70,16 @@ class MemberPackagesSearch extends MemberPackage
         return $dataProvider;
     }
 
+    /**
+     * Creates data provider instance with search query applied
+     * Specific Based On ID
+     * @param array $params
+     *
+     * @return ActiveDataProvider
+     */
     public function search2($id)
     {
-        $query = MemberPackage::find();
+        $query = Withdrawal::find();
 
         // add conditions that should always apply here
 
@@ -88,20 +94,46 @@ class MemberPackagesSearch extends MemberPackage
             // $query->where('0=1');
             return $dataProvider;
         }
+
         // grid filtering conditions
         $query->andFilterWhere([
             //'id' => $this->id,
             'user_id' => $id,
-            //'refferor_id' => $this->refferor_id,
-            //'package_id' => $this->package_id,
-            //'filling_date' => $this->filling_date,
-            //'create_at' => $this->create_at,
+            //'amount' => $this->amount,
+            //'created_at' => $this->created_at,
         ]);
 
         $query->andFilterWhere(['like', 'status', $this->status]);
 
-     
         return $dataProvider;
     }
+ /**
+     * Creates data provider instance with search query applied
+     * Specific Based Status
+     * @param array $params
+     *
+     * @return ActiveDataProvider
+     */
+    public function search3()
+    {
+        $query = Withdrawal::find();
 
+        // add conditions that should always apply here
+
+        $dataProvider = new ActiveDataProvider([
+            'query' => $query,
+        ]);
+
+        //$this->load($params);
+
+        if (!$this->validate()) {
+            // uncomment the following line if you do not want to return any records when validation fails
+            // $query->where('0=1');
+            return $dataProvider;
+        }
+
+        $query->andFilterWhere(['like', 'status', 'pending']);
+
+        return $dataProvider;
+    }
 }

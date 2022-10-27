@@ -4,12 +4,12 @@ namespace backend\models;
 
 use yii\base\Model;
 use yii\data\ActiveDataProvider;
-use backend\models\MemberPackage;
+use backend\models\MembersIncome;
 
 /**
- * MemberPackagesSearch represents the model behind the search form of `backend\models\MemberPackage`.
+ * MembersIncomeSearch represents the model behind the search form of `backend\models\MembersIncome`.
  */
-class MemberPackagesSearch extends MemberPackage
+class MembersIncomeSearch extends MembersIncome
 {
     /**
      * {@inheritdoc}
@@ -17,8 +17,9 @@ class MemberPackagesSearch extends MemberPackage
     public function rules()
     {
         return [
-            [['id', 'user_id', 'refferor_id', 'package_id'], 'integer'],
-            [['filling_date', 'status', 'create_at'], 'safe'],
+            [['id', 'user_id'], 'integer'],
+            [['amount'], 'number'],
+            [['type', 'created_at'], 'safe'],
         ];
     }
 
@@ -40,7 +41,7 @@ class MemberPackagesSearch extends MemberPackage
      */
     public function search($params)
     {
-        $query = MemberPackage::find();
+        $query = MembersIncome::find();
 
         // add conditions that should always apply here
 
@@ -60,20 +61,24 @@ class MemberPackagesSearch extends MemberPackage
         $query->andFilterWhere([
             'id' => $this->id,
             'user_id' => $this->user_id,
-            'refferor_id' => $this->refferor_id,
-            'package_id' => $this->package_id,
-            'filling_date' => $this->filling_date,
-            'create_at' => $this->create_at,
+            'amount' => $this->amount,
+            'created_at' => $this->created_at,
         ]);
 
-        $query->andFilterWhere(['like', 'status', $this->status]);
+        $query->andFilterWhere(['like', 'type', $this->type]);
 
         return $dataProvider;
     }
-
+    /**
+     * Creates data provider instance with search query applied
+     *
+     * @param array $params
+     *
+     * @return ActiveDataProvider
+     */
     public function search2($id)
     {
-        $query = MemberPackage::find();
+        $query = MembersIncome::find();
 
         // add conditions that should always apply here
 
@@ -81,27 +86,25 @@ class MemberPackagesSearch extends MemberPackage
             'query' => $query,
         ]);
 
-        //$this->load($params);
+       // $this->load($params);
 
         if (!$this->validate()) {
             // uncomment the following line if you do not want to return any records when validation fails
             // $query->where('0=1');
             return $dataProvider;
         }
+
         // grid filtering conditions
         $query->andFilterWhere([
             //'id' => $this->id,
             'user_id' => $id,
-            //'refferor_id' => $this->refferor_id,
-            //'package_id' => $this->package_id,
-            //'filling_date' => $this->filling_date,
-            //'create_at' => $this->create_at,
+            'type' =>'income',
+            //'amount' => $this->amount,
+            //'created_at' => $this->created_at,
         ]);
 
-        $query->andFilterWhere(['like', 'status', $this->status]);
+        $query->andFilterWhere(['like', 'type', $this->type]);
 
-     
         return $dataProvider;
     }
-
 }

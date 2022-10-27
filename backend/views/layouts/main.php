@@ -32,14 +32,21 @@ AppAsset::register($this);
     <?php
     NavBar::begin([
         'brandLabel' => Yii::$app->name,
-        'brandUrl' => Yii::$app->homeUrl,
+        'brandUrl' => null,
         'options' => [
             'class' => 'navbar navbar-expand-md navbar-dark bg-dark fixed-top',
         ],
     ]);
+
     $menuItems = [
-        ['label' => 'Home', 'url' => ['/site/index']],
     ];
+    
+    if (Yii::$app->user->can('admin')) {
+        $menuItems[] = ['label' => 'Dashboard', 'url' => ['./user']];
+        $menuItems[] = ['label' => 'Withdrawal', 'url' => ['./withdrawal']];
+        $menuItems[] = ['label' => 'Packages Manager', 'url' => ['./packages']];
+    }
+
     if (Yii::$app->user->isGuest) {
         $menuItems[] = ['label' => 'Login', 'url' => ['/site/login']];
     }     

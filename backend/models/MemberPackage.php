@@ -35,7 +35,7 @@ class MemberPackage extends \yii\db\ActiveRecord
     public function rules()
     {
         return [
-            [['user_id', 'refferor_id', 'package_id', 'filling_date', 'status'], 'required'],
+            [['user_id', 'refferor_id', 'package_id', 'filling_date'], 'required'],
             [['user_id', 'refferor_id', 'package_id'], 'integer'],
             [['filling_date', 'create_at'], 'safe'],
             [['status'], 'string'],
@@ -52,7 +52,7 @@ class MemberPackage extends \yii\db\ActiveRecord
     {
         return [
             'id' => Yii::t('app', 'ID'),
-            'user_id' => Yii::t('app', 'User ID'),
+            'user_id' => Yii::t('app', 'User'),
             'refferor_id' => Yii::t('app', 'Refferor ID'),
             'package_id' => Yii::t('app', 'Package ID'),
             'filling_date' => Yii::t('app', 'Filling Date'),

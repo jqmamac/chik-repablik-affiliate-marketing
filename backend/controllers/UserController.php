@@ -1,14 +1,19 @@
 <?php
 
 namespace backend\controllers;
+
+use backend\models\MemberPackagesSearch;
+use backend\models\MembersIncomeSearch;
+
 use Yii;
 use backend\models\User;
 use backend\models\UserSearch;
+use backend\models\WithdrawalSearch;
 use yii\web\Controller;
 use yii\web\NotFoundHttpException;
 use yii\filters\VerbFilter;
-use yii\helpers\Url;
-use yii\base\InvalidCallException;
+use yii\filters\AccessControl;
+use yii\db\IntegrityException;
 
 /**
  * UserController implements the CRUD actions for User model.
@@ -19,10 +24,30 @@ class UserController extends Controller
      * @inheritDoc
      */
     public function behaviors()
-    {
+    { 
         return array_merge(
             parent::behaviors(),
             [
+                'access' => [
+                    'class' => AccessControl::class,
+                    'rules' => [
+                        [
+                            'actions' => ['login', 'error'],
+                            'allow' => true,
+                        ],
+                        [
+                            'allow' => true,
+                            'actions' => ['user','view'],
+                            'roles' => ['admin','member'],
+                        ],
+                        [
+                            'allow' => true,
+                            'actions' => ['index','delete','activate'],
+                            'roles' => ['admin'],
+                        ],
+                        
+                    ],
+                ],
                 'verbs' => [
                     'class' => VerbFilter::className(),
                     'actions' => [
@@ -43,9 +68,19 @@ class UserController extends Controller
         $searchModel = new UserSearch();
         $dataProvider = $searchModel->search($this->request->queryParams);
       
+        //Member Withdrawal
+        $searchModel2 = new WithdrawalSearch();
+        $dataProvider2 = $searchModel2->search3();
+
+        //Member Income
+        $searchModel3 = new MembersIncomeSearch();
+
         return $this->render('index', [
             'searchModel' => $searchModel,
             'dataProvider' => $dataProvider,
+            'searchModel2' => $searchModel2,
+            'dataProvider2' => $dataProvider2,
+            'searchModel3' => $searchModel3,
         ]);
     }
 
@@ -62,14 +97,32 @@ class UserController extends Controller
         if ($model->load(Yii::$app->request->post())) {
             if($model->save()){
                 Yii::$app->session->setFlash('kv-detail-success', 'Saved record successfully');
-                // Multiple alerts can be set like below
-                //Yii::$app->session->setFlash('kv-detail-warning', 'A last warning for completing all data.');
-               // Yii::$app->session->setFlash('kv-detail-info', '<b>Note:</b> You can proceed by clicking <a href="#">this link</a>.');
                 return $this->redirect(['view', 'id'=>$model->id]);
             }
 
         } else {
-            return $this->render('view', ['model'=>$model]);
+
+            //Member Package
+            $searchModel = new MemberPackagesSearch();
+            $dataProvider = $searchModel->search2($id);
+
+            //Member Withdrawal
+            $searchModel2 = new WithdrawalSearch();
+            $dataProvider2 = $searchModel2->search2($id);
+
+            //Member Package
+            $searchModel3 = new MembersIncomeSearch();
+            $dataProvider3 = $searchModel3->search2($id);
+          
+            return $this->render('view', [
+                'model' => $model,
+                'searchModel' => $searchModel,
+                'dataProvider' => $dataProvider,
+                'searchModel2' => $searchModel2,
+                'dataProvider2' => $dataProvider2,
+                'searchModel3' => $searchModel3,
+                'dataProvider3' => $dataProvider3,
+            ]);
         }
     }
 
@@ -124,9 +177,13 @@ class UserController extends Controller
      */
     public function actionDelete($id)
     {
-       $this->findModel($id)->delete();
-
-        return $this->redirect(['index']);
+       try {
+            $this->findModel($id)->delete();
+            return $this->redirect(['index']);
+        } catch (IntegrityException $e) {
+            
+            throw new NotFoundHttpException(Yii::t('app', 'Unable to delete affiliate.'));
+        }
     }
 
     /**
@@ -157,14 +214,17 @@ class UserController extends Controller
         $model = $this->findModel($id);
 
         if($model->status == 10)
-        {
+        {   
             $model->status = 9;
-        }else{
+        }
+        elseif($model->status == 9)
+        {
             $model->status = 10;
         }
-        
+     
         if ($model->save()) {
             return $this->redirect(['index']);
         }
+       
     }
 }

@@ -5,9 +5,8 @@ use yii\helpers\Html;
 /** @var yii\web\View $this */
 /** @var backend\models\Packages $model */
 
-$this->title = Yii::t('app', 'Create Packages');
-$this->params['breadcrumbs'][] = ['label' => Yii::t('app', 'Packages'), 'url' => ['index']];
-$this->params['breadcrumbs'][] = $this->title;
+$this->title = Yii::t('app', 'Create Package');
+
 ?>
 <div class="packages-create">
 
