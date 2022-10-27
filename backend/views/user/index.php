@@ -45,9 +45,26 @@ $this->title = Yii::t('app', 'Administrator Dashboard');
                             },
                         ],
                         [
-                            'label' => 'Income',
+                            'label' => 'Wallet Balance',
                             'value' => function ($model) {
                                 $user =  $model->getTotalIncome($model->id);
+                                if ($user) {
+                                    return $user;
+                                }else{
+                                    return 0;
+                                }
+                                
+                            },
+                            'vAlign' => 'middle',
+                            'hAlign' => 'right', 
+                            'width' => '7%',
+                            'format' => ['decimal', 2],
+                            'pageSummary' => true,
+                        ],
+                        [
+                            'label' => 'Accumulated Income',
+                            'value' => function ($model) {
+                                $user =  $model->getTotalIncomeOnly($model->id);
                                 if ($user) {
                                     return $user;
                                 }else{

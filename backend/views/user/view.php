@@ -248,7 +248,7 @@ $this->title = Yii::t('app', 'Affiliate Dashboard');
         'pjax'=>true,
         'responsive'=>true,
         'panel' => [
-            'heading'=>'<h3 class="panel-title"><i class="fas fa-book"></i> Business Info</h3>',
+            'heading'=>'<h3 class="panel-title"><i class="fas fa-book"></i> Business Info </h3>',
             'before'=>Html::a('<i class="fas fa-plus"></i> Add Package', ['member-package/create','id'=>$model->id], ['class' => 'btn btn-success']),
             'type'=>'success',
         ],
@@ -263,13 +263,6 @@ $this->title = Yii::t('app', 'Affiliate Dashboard');
         //'filterModel' => $searchModel,
         'columns' => [
                        'id',
-                        [
-                            'attribute' => 'amount', 
-                            'vAlign' => 'middle',
-                            'hAlign' => 'right', 
-                            'width' => '7%',
-                            'format' => ['decimal', 2],
-                        ],
                        'created_at',
                        'note',
                         [
@@ -295,12 +288,21 @@ $this->title = Yii::t('app', 'Affiliate Dashboard');
                              },
                             'headerOptions' => ['class' => 'kartik-sheet-style'],
                         ],
+                        [
+                            'attribute' => 'amount', 
+                            'vAlign' => 'middle',
+                            'hAlign' => 'right', 
+                            'width' => '7%',
+                            'format' => ['decimal', 2],
+                            'pageSummary' => true,
+                        ],
                                                                     
                     ],
         'pjax'=>true,
         'responsive'=>true,
+        'showPageSummary' => true,
         'panel' => [
-            'heading'=>'<h3 class="panel-title"><i class="fa fa-money"></i> Available Income:  ₱'.$searchModel3->getTotalIncome($model->id).'</h3>',
+            'heading'=>'<h3 class="panel-title"><i class="fa fa-money"></i> Wallet Balance:  ₱'.$searchModel3->getTotalIncome($model->id).'</h3>',
             'before'=>(Yii::$app->user->can('admin')) ? Html::a('<i class="fas fa-plus"></i> Add Income', ['members-income/create','id'=>$model->id], ['class' => 'btn btn-success']) : '',
             'type'=>'success',
         ],
