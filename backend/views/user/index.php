@@ -114,7 +114,7 @@ $this->title = Yii::t('app', 'Administrator Dashboard');
                     ],
         'pjax'=>true,
         'responsive'=>true,
-        'responsiveWrap' =>true,
+        'responsiveWrap' =>false,
         'showPageSummary' => true,
         'panel' => [
             'heading'=>'<h3 class="panel-title"><i class="fas fa-user"></i> Affiliate List</h3>',
@@ -175,7 +175,7 @@ $this->title = Yii::t('app', 'Administrator Dashboard');
                     ],
         'pjax'=>true,
         'responsive'=>true,
-        'responsiveWrap' =>true,
+        'responsiveWrap' =>false,
         'showPageSummary' => true,
         'panel' => [
             'heading'=>'<h3 class="panel-title"><i class="fa fa-money"></i> Withrawal Request  </h3>',
