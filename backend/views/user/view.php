@@ -247,6 +247,7 @@ $this->title = Yii::t('app', 'Affiliate Dashboard');
                     ],
         'pjax'=>true,
         'responsive'=>true,
+        'responsiveWrap' =>false,
         'panel' => [
             'heading'=>'<h3 class="panel-title"><i class="fas fa-book"></i> Business Info </h3>',
             'before'=>Html::a('<i class="fas fa-plus"></i> Add Package', ['member-package/create','id'=>$model->id], ['class' => 'btn btn-success']),
@@ -300,6 +301,7 @@ $this->title = Yii::t('app', 'Affiliate Dashboard');
                     ],
         'pjax'=>true,
         'responsive'=>true,
+        'responsiveWrap' =>false,
         'showPageSummary' => true,
         'panel' => [
             'heading'=>'<h3 class="panel-title"><i class="fa fa-money"></i> Wallet Balance:  ₱'.$searchModel3->getTotalIncome($model->id).'</h3>',
@@ -350,6 +352,7 @@ $this->title = Yii::t('app', 'Affiliate Dashboard');
                     ],
         'pjax'=>true,
         'responsive'=>true,
+        'responsiveWrap' =>false,
         'panel' => [
             'heading'=>'<h3 class="panel-title"><i class="fa fa-money"></i> Withrawal  </h3>',
             'before'=>Html::a('<i class="fas fa-plus"></i> Cashout', ['withdrawal/create','id'=>$model->id], ['class' => 'btn btn-success']),
