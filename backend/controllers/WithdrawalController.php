@@ -105,7 +105,7 @@ class WithdrawalController extends Controller
                 
                 $totali = $modelIncome->getTotalIncome($modelIncome->user_id);
 
-                if ($totali > $model->amount ){
+                if ($totali >= $model->amount ){
                     $transaction = Yii::$app->db->beginTransaction();
                     if( $model->save() && $modelIncome->save()){
                         $transaction->commit(); 
