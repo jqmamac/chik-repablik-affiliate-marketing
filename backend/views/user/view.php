@@ -249,7 +249,7 @@ $this->title = Yii::t('app', 'Affiliate Dashboard');
         'responsive'=>true,
         'responsiveWrap' =>false,
         'panel' => [
-            'heading'=>'<h3 class="panel-title"><i class="fas fa-book"></i> Business Info </h3>',
+            'heading'=>'<h3 class="panel-title"><i class="fas fa-book"></i> Business Info | Accumulated ₱'.$searchModel3->getTotalIncomeOnly($model->id).'</h3>',
             'before'=>Html::a('<i class="fas fa-plus"></i> Add Package', ['member-package/create','id'=>$model->id], ['class' => 'btn btn-success']),
             'type'=>'success',
         ],

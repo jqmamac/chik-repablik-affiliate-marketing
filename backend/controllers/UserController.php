@@ -75,6 +75,9 @@ class UserController extends Controller
         //Member Income
         $searchModel3 = new MembersIncomeSearch();
 
+        $dataProvider->pagination->pageSize=10;
+        $dataProvider2->pagination->pageSize=10;
+
         return $this->render('index', [
             'searchModel' => $searchModel,
             'dataProvider' => $dataProvider,
@@ -113,6 +116,10 @@ class UserController extends Controller
             //Member Package
             $searchModel3 = new MembersIncomeSearch();
             $dataProvider3 = $searchModel3->search2($id);
+
+            $dataProvider->pagination->pageSize=10;
+            $dataProvider2->pagination->pageSize=10;
+            $dataProvider3->pagination->pageSize=10;
           
             return $this->render('view', [
                 'model' => $model,
